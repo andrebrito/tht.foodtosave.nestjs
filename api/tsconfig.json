@@ -1,5 +1,8 @@
 {
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
   "compilerOptions": {
+    "rootDir": "./",
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -16,6 +19,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "skipDefaultLibCheck": true,
+    "paths": {
+      "@foodtosave/*": ["./src/*"]
+    }
   }
 }

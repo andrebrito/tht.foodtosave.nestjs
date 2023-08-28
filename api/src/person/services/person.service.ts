@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/services/prisma.service';
-import { CreatePersonDto } from './dto/create-person.dto';
-import { UpdatePersonDto } from './dto/update-person.dto';
-import { PersonEntity } from './entities/person.entity';
+import { PrismaService } from '../../prisma/services/prisma.service';
+import { CreatePersonDto } from '../dto/create-person.dto';
+import { PersonEntity } from '../entities/person.entity';
 
 @Injectable()
 export class PersonService {
@@ -35,22 +34,6 @@ export class PersonService {
     }
 
     return new PersonEntity(person);
-  }
-
-  async update(
-    id: number,
-    updatePersonDto: UpdatePersonDto,
-  ): Promise<PersonEntity> {
-    const updated = await this.prismaService.person.update({
-      where: {
-        id,
-      },
-      data: {
-        name: updatePersonDto.name,
-      },
-    });
-
-    return new PersonEntity(updated);
   }
 
   async remove(id: number) {
