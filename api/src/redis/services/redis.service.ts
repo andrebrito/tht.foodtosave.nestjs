@@ -1,22 +1,33 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 
 @Injectable()
 export class RedisService {
-  private DEFAULT_TTL = 10000;
+  private readonly DEFAULT_TTL = 10;
+  private readonly LOGGER = new Logger(RedisService.name);
 
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   set(key: string, content: string) {
-    return this.cacheManager.set(
-      key,
-      content,
-      process.env.TTL || this.DEFAULT_TTL,
-    );
+    const ttl = process.env.REDIS_TTL
+      ? Number(process.env.REDIS_TTL)
+      : this.DEFAULT_TTL;
+
+    this.LOGGER.log(`setting key ${key}, ttl ${ttl}`);
+
+    return this.cacheManager.set(key, content, {
+      ttl,
+    });
   }
 
-  get(key: string) {
+  get(key: string): Promise<string> {
+    this.LOGGER.log(`querying key ${key}`);
     return this.cacheManager.get(key);
+  }
+
+  delete(key: string) {
+    this.LOGGER.log(`removing ${key}`);
+    return this.cacheManager.del(key);
   }
 }
