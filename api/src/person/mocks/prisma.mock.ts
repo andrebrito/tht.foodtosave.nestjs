@@ -5,5 +5,6 @@ export const prismaMock = {
     findUnique: jest.fn().mockResolvedValue({}),
     findMany: jest.fn().mockResolvedValue([{}]),
     delete: jest.fn().mockResolvedValue({}),
+    count: jest.fn().mockResolvedValue(0),
   },
 };
