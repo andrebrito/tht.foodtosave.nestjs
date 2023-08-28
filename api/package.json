@@ -16,7 +16,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "pretest:e2e": "docker-compose -f ./docker-compose-test.yml up -d",
+    "posttest:e2e": "docker rm -f foodtosave-nestjs-test-db",
+    "test:e2e": "yarn pretest:e2e && dotenv -e .env.test -- yarn jest --runInBand --config ./test/jest-e2e.ts && yarn posttest:e2e"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -24,6 +26,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "5.2.0",
+    "dotenv-cli": "^7.3.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },
