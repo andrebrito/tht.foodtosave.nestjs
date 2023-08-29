@@ -17,8 +17,11 @@ services:
       - '6372:6379'
   api:
     container_name: foodtosave-api-nestjs
-    image: foodtosave-nestjs
-    depends_on: [database, redis]
+    image: foodtosave-nestjs:latest
+    depends_on:
+      - database
+    restart: always
+    stdin_open: true
     environment:
       - DATABASE_URL=postgresql://test:test@database/food-to-save-nestjs?schema=public
       - REDIS_HOST=redis

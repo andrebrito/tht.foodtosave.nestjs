@@ -8,7 +8,10 @@ COPY prisma ./prisma/
 
 RUN yarn install --frozen-file
 
+RUN yarn prisma generate
+
 COPY . .
+
 
 EXPOSE 3000
 
