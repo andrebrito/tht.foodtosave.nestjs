@@ -1,0 +1,16 @@
+version: '3'
+services:
+  database:
+    container_name: foodtosave-nestjs-db
+    image: postgres:14
+    environment:
+      - 'POSTGRES_DB=food-to-save-nestjs'
+      - 'POSTGRES_USER=test'
+      - 'POSTGRES_PASSWORD=test'
+    ports:
+      - '5430:5432'
+  redis:
+    container_name: foodtosave-nestjs-redis
+    image: redis:7
+    ports:
+      - '6378:6379'

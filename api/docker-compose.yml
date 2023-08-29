@@ -8,9 +8,21 @@ services:
       - 'POSTGRES_USER=test'
       - 'POSTGRES_PASSWORD=test'
     ports:
-      - '5430:5432'
+      - '5431:5432'
   redis:
     container_name: foodtosave-nestjs-redis
     image: redis:7
+    restart: always
     ports:
-      - '6378:6379'
+      - '6372:6379'
+  api:
+    container_name: foodtosave-api-nestjs
+    image: foodtosave-nestjs
+    depends_on: [database, redis]
+    environment:
+      - DATABASE_URL=postgresql://test:test@database/food-to-save-nestjs?schema=public
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_TTL=10
+    ports:
+      - '3000:3000'
