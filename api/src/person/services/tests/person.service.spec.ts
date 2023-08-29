@@ -2,8 +2,10 @@ import { NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaModule } from '../../../prisma/prisma.module';
 import { PrismaService } from '../../../prisma/services/prisma.service';
+import { RedisService } from '../../../redis/services/redis.service';
 import { PersonEntity } from '../../entities/person.entity';
-import { prismaMock } from '../../mocks/prisma.mock';
+import { prismaServiceMock } from '../../mocks/prisma.mock';
+import { redisServiceMock } from '../../mocks/redis.service.mock';
 import { PersonService } from '../person.service';
 
 describe('PersonService', () => {
@@ -12,11 +14,17 @@ describe('PersonService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [PrismaModule],
-      providers: [PersonService],
+      providers: [PersonService, RedisService],
     })
       .overrideProvider(PrismaService)
-      .useValue(prismaMock)
+      .useValue(prismaServiceMock)
+      .overrideProvider(RedisService)
+      .useValue(redisServiceMock)
       .compile();
+
+    redisServiceMock.set = jest.fn().mockResolvedValueOnce(undefined);
+    redisServiceMock.get = jest.fn().mockResolvedValueOnce(undefined);
+    redisServiceMock.delete = jest.fn().mockResolvedValueOnce(undefined);
 
     service = module.get<PersonService>(PersonService);
   });
@@ -25,18 +33,41 @@ describe('PersonService', () => {
     expect(service).toBeDefined();
   });
 
-  it('should invoke prismaService.create with data sent', async () => {
+  it('should invoke prismaService.create', async () => {
+    prismaServiceMock.person.create = jest.fn().mockResolvedValueOnce({
+      id: 1,
+      name: 'Andrew',
+      createdAt: new Date(),
+    });
+
     await service.create({ name: 'Andrew' });
 
-    expect(prismaMock.person.create).toHaveBeenLastCalledWith({
+    expect(prismaServiceMock.person.create).toHaveBeenLastCalledWith({
       data: {
         name: 'Andrew',
       },
     });
   });
 
+  it('should invoke redisService.set with created record', async () => {
+    redisServiceMock.set.mockClear();
+
+    prismaServiceMock.person.create = jest.fn().mockResolvedValueOnce({
+      id: 1,
+      name: 'Andrew',
+      createdAt: new Date(),
+    });
+
+    await service.create({ name: 'Andrew' });
+
+    expect(redisServiceMock.set).toHaveBeenLastCalledWith(
+      '1',
+      expect.any(String),
+    );
+  });
+
   it('should return PersonEntity after invoking prismaService.create', async () => {
-    prismaMock.person.create = jest.fn().mockResolvedValueOnce({
+    prismaServiceMock.person.create = jest.fn().mockResolvedValueOnce({
       id: 1,
       name: 'Andrew',
       createdAt: new Date(),
@@ -54,7 +85,7 @@ describe('PersonService', () => {
   });
 
   it('should invoke prismaService.findUnique with id', async () => {
-    prismaMock.person.findUnique = jest.fn().mockResolvedValueOnce({
+    prismaServiceMock.person.findUnique = jest.fn().mockResolvedValueOnce({
       id: 1,
       name: 'Andrew',
       createdAt: new Date(),
@@ -62,7 +93,7 @@ describe('PersonService', () => {
 
     await service.findOne(1);
 
-    expect(prismaMock.person.findUnique).toHaveBeenLastCalledWith({
+    expect(prismaServiceMock.person.findUnique).toHaveBeenLastCalledWith({
       where: {
         id: 1,
       },
@@ -70,7 +101,7 @@ describe('PersonService', () => {
   });
 
   it('should return PersonEntity with data returned from prismaService.findUnique', async () => {
-    prismaMock.person.findUnique = jest.fn().mockResolvedValueOnce({
+    prismaServiceMock.person.findUnique = jest.fn().mockResolvedValueOnce({
       id: 1,
       name: 'Andrew',
       createdAt: new Date(),
@@ -88,7 +119,7 @@ describe('PersonService', () => {
   });
 
   it('should throw NotFoundException when prismaService.findUnique returns null', async () => {
-    prismaMock.person.findUnique = jest.fn().mockResolvedValueOnce(null);
+    prismaServiceMock.person.findUnique = jest.fn().mockResolvedValueOnce(null);
 
     let error;
 
@@ -104,7 +135,7 @@ describe('PersonService', () => {
   });
 
   it('should invoke prismaService.findMany', async () => {
-    prismaMock.person.findMany = jest.fn().mockResolvedValueOnce([
+    prismaServiceMock.person.findMany = jest.fn().mockResolvedValueOnce([
       {
         id: 1,
         name: 'Andrew',
@@ -114,11 +145,11 @@ describe('PersonService', () => {
 
     await service.findAll();
 
-    expect(prismaMock.person.findMany).toHaveBeenLastCalledWith();
+    expect(prismaServiceMock.person.findMany).toHaveBeenLastCalledWith();
   });
 
   it('should return PersonEntity list with data returned from prismaService.findMany', async () => {
-    prismaMock.person.findMany = jest.fn().mockResolvedValueOnce([
+    prismaServiceMock.person.findMany = jest.fn().mockResolvedValueOnce([
       {
         id: 1,
         name: 'Andrew',
@@ -150,8 +181,8 @@ describe('PersonService', () => {
   });
 
   it('should invoke prismaService.count and prismaService.delete with id from args when count defined', async () => {
-    prismaMock.person.count = jest.fn().mockResolvedValueOnce(1);
-    prismaMock.person.delete = jest.fn().mockResolvedValueOnce([
+    prismaServiceMock.person.count = jest.fn().mockResolvedValueOnce(1);
+    prismaServiceMock.person.delete = jest.fn().mockResolvedValueOnce([
       {
         id: 1,
         name: 'Andrew',
@@ -161,13 +192,13 @@ describe('PersonService', () => {
 
     await service.remove(1);
 
-    expect(prismaMock.person.count).toHaveBeenLastCalledWith({
+    expect(prismaServiceMock.person.count).toHaveBeenLastCalledWith({
       where: {
         id: 1,
       },
     });
 
-    expect(prismaMock.person.delete).toHaveBeenLastCalledWith({
+    expect(prismaServiceMock.person.delete).toHaveBeenLastCalledWith({
       where: {
         id: 1,
       },
@@ -175,23 +206,23 @@ describe('PersonService', () => {
   });
 
   it('should not invoke prismaService.delete when prismaService.count is 0', async () => {
-    prismaMock.person.delete.mockClear();
-    prismaMock.person.count = jest.fn().mockResolvedValueOnce(0);
+    prismaServiceMock.person.delete.mockClear();
+    prismaServiceMock.person.count = jest.fn().mockResolvedValueOnce(0);
 
     await service.remove(1);
 
-    expect(prismaMock.person.count).toHaveBeenLastCalledWith({
+    expect(prismaServiceMock.person.count).toHaveBeenLastCalledWith({
       where: {
         id: 1,
       },
     });
 
-    expect(prismaMock.person.delete).not.toHaveBeenCalled();
+    expect(prismaServiceMock.person.delete).not.toHaveBeenCalled();
   });
 
   it('should not invoke prismaService.count without id when arg is null', async () => {
     await service.count();
 
-    expect(prismaMock.person.count).toHaveBeenLastCalledWith();
+    expect(prismaServiceMock.person.count).toHaveBeenLastCalledWith();
   });
 });

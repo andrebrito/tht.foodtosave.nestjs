@@ -9,3 +9,8 @@ services:
       - 'POSTGRES_PASSWORD=test'
     ports:
       - '5429:5432'
+  redis:
+    container_name: foodtosave-nestjs-test-redis
+    image: redis:7
+    ports:
+      - '6377:6379'

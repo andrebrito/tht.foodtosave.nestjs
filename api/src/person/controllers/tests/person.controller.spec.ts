@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { personServiceMock } from '../../mocks/person-mock';
+import { personServiceMock } from '../../mocks/person.service.mock';
 import { PersonService } from '../../services/person.service';
 import { PersonController } from '../person.controller';
 

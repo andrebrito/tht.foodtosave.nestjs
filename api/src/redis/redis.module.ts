@@ -5,8 +5,6 @@ import * as redisStore from 'cache-manager-redis-store';
 import { RedisClientOptions } from 'redis';
 import { RedisService } from './services/redis.service';
 
-console.log('process.env.REDIS_PORT,', process.env.REDIS_PORT);
-
 @Module({
   imports: [
     ConfigModule.forRoot(),

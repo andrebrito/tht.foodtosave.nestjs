@@ -1,4 +1,4 @@
-export const prismaMock = {
+export const prismaServiceMock = {
   person: {
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),

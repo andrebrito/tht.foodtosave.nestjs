@@ -17,7 +17,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "pretest:e2e": "docker-compose -f ./docker-compose-test.yml up -d",
-    "posttest:e2e": "docker rm -f foodtosave-nestjs-test-db",
+    "posttest:e2e": "docker rm -f foodtosave-nestjs-test-db; docker rm -f foodtosave-nestjs-test-redis",
     "test:e2e": "yarn pretest:e2e && dotenv -e .env.test -- yarn jest --runInBand --config ./test/jest-e2e.ts && yarn posttest:e2e"
   },
   "dependencies": {

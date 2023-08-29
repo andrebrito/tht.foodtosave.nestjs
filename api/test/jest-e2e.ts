@@ -15,6 +15,7 @@ const config: Config = {
       },
     ],
   },
+  forceExit: true,
 };
 
 export default config;

@@ -1,6 +1,6 @@
-import { RedisService } from '@foodtosave/redis/services/redis.service';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/services/prisma.service';
+import { RedisService } from '../../redis/services/redis.service';
 import { CreatePersonDto } from '../dto/create-person.dto';
 import { PersonEntity } from '../entities/person.entity';
 
